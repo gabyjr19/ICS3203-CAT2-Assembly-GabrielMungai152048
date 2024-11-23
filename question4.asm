@@ -38,3 +38,25 @@ end_program:
     mov eax, 1               ; sys_exit syscall
     xor ebx, ebx             ; Exit code 0
     int 0x80
+
+
+;The program simulates monitoring a water level sensor and performing appropriate actions based on the sensor value.
+
+;Three cases are handled:
+;Low water level: The motor is turned ON, and the alarm remains OFF.
+;Moderate water level: Both the motor and alarm are turned OFF.
+;High water level: The motor is ON, and the alarm is triggered.
+
+;Memory-Mapped I/O:
+;sensor_value: Simulates the input port/memory where the sensor value is stored.
+;motor_status: Simulates a memory location controlling the motor's state (0 = off, 1 = on).
+;alarm_status: Simulates a memory location controlling the alarm's state (0 = off, 1 = on).
+
+;Control Flow:
+;The sensor value is loaded into the AL register for evaluation.
+;The program uses CMP and conditional jumps (JE, JL) to decide the appropriate action based on the sensor value.
+
+;Impact on Memory/Ports:
+;The motor's state is updated by writing to the motor_status variable.
+;The alarm's state is updated by writing to the alarm_status variable.
+;These writes simulate the effect of controlling hardware through memory-mapped I/O.
