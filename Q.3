@@ -1,116 +1,34 @@
 section .data
-    result_msg db "Factorial: ", 0
-    newline db 0xA, 0
-
-section .bss
-    number resb 1  ; Space for the user-inputted number
-    result resb 4  ; Space for the factorial result
+    num db 5                    ; Number to calculate factorial for
+    result dd 1                 ; Result initialized to 1
 
 section .text
     global _start
 
 _start:
-    ; Prompt for user input (assume single-digit number)
-    mov eax, 3       ; sys_read syscall
-    mov ebx, 0       ; Read from stdin
-    mov ecx, number  ; Address to store input
-    mov edx, 1       ; Read 1 byte
-    int 0x80         ; Interrupt
+    ; Load the number to calculate factorial
+    mov al, [num]
+    call factorial              ; Call factorial subroutine
 
-    ; Convert ASCII input to integer
-    mov al, [number] ; Load input character
-    sub al, '0'      ; Convert ASCII to integer
-    cbw              ; Sign-extend AL to AX
-    movzx ebx, ax    ; Move the number into EBX
-
-    ; Call the factorial subroutine
-    push ebx         ; Push the number (argument)
-    call factorial   ; Call the subroutine
-    add esp, 4       ; Clean up the stack (pop argument)
-
-    ; Result is in EAX; store it
+    ; Store the result
     mov [result], eax
 
-    ; Print the result
-    mov eax, 4       ; sys_write syscall
-    mov ebx, 1       ; Write to stdout
-    mov ecx, result_msg ; Address of the message
-    mov edx, 11      ; Length of the message
-    int 0x80         ; Interrupt
-
-    ; Convert the result to ASCII and print it
-    mov eax, [result]
-    call print_number
-
-    ; Print a newline
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, newline
-    mov edx, 1
+    ; Exit program
+    mov eax, 1                  ; sys_exit
+    xor ebx, ebx                ; Exit code 0
     int 0x80
 
-    ; Exit the program
-    mov eax, 1       ; sys_exit syscall
-    xor ebx, ebx     ; Exit code 0
-    int 0x80
-
-; Factorial Subroutine
-; Input: EBX (number)
-; Output: EAX (factorial result)
 factorial:
-    push ebp         ; Save base pointer
-    mov ebp, esp     ; Set up stack frame
-    push ebx         ; Save EBX (input)
-    push ecx         ; Save ECX (counter)
-    push edx         ; Save EDX (temporary)
+    ; Base case: if n <= 1, return 1
+    cmp al, 1
+    jle factorial_done
 
-    mov eax, 1       ; Initialize EAX to 1 (result)
-factorial_loop:
-    cmp ebx, 1       ; Compare EBX with 1
-    jle factorial_end ; If EBX <= 1, exit loop
-    imul eax, ebx    ; Multiply EAX by EBX
-    dec ebx          ; Decrement EBX
-    jmp factorial_loop ; Repeat loop
+    ; Recursive case: n * factorial(n-1)
+    push eax                    ; Save current value of eax
+    dec al                      ; n = n - 1
+    call factorial              ; Recursive call
+    pop ebx                     ; Restore original n into ebx
+    mul bl                      ; eax = n * factorial(n-1)
 
-factorial_end:
-    pop edx          ; Restore EDX
-    pop ecx          ; Restore ECX
-    pop ebx          ; Restore EBX
-    mov esp, ebp     ; Restore stack frame
-    pop ebp          ; Restore base pointer
-    ret              ; Return to caller
-
-; Print Number Subroutine
-; Input: EAX (integer to print)
-; Output: Number printed to stdout
-print_number:
-    push ebp         ; Save base pointer
-    mov ebp, esp     ; Set up stack frame
-    sub esp, 16      ; Allocate space on stack
-
-    mov [esp + 12], eax ; Store EAX on the stack
-    mov ecx, esp + 8  ; Point to output buffer
-    mov eax, [esp + 12] ; Get the number
-
-    ; Generate digits in reverse order
-    mov edx, 0
-print_loop:
-    xor edx, edx     ; Clear remainder
-    div byte [esp + 4] ; Divide by 10
-    add dl, '0'      ; Convert to ASCII
-    dec ecx          ; Move buffer pointer back
-    mov [ecx], dl    ; Store ASCII digit
-    test eax, eax    ; Check if number is zero
-    jnz print_loop   ; If not, continue loop
-
-    ; Print the number
-    mov edx, esp + 8 ; Address of the string
-    mov eax, 4       ; sys_write syscall
-    mov ebx, 1       ; Write to stdout
-    mov ecx, edx     ; Address of the number string
-    mov edx, esp + 8 ; Length of the number string
-    int 0x80         ; Interrupt
-
-    mov esp, ebp     ; Restore stack
-    pop ebp          ; Restore base pointer
-    ret
+factorial_done:
+    ret                         ; Return from subroutine
