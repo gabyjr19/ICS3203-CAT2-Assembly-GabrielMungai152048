@@ -32,3 +32,9 @@ factorial:
 
 factorial_done:
     ret                         ; Return from subroutine
+
+;Register management-Registers EBX, ECX, and EDX are used in the subroutine and must be preserved.
+;The stack is used to save these registers before computations begin, ensuring that their original values are restored upon returning to the caller.
+
+;Challenges-Recursive implementation was avoided for simplicity, and an iterative approach was used.
+;Result Placement-The factorial result is stored in the EAX register upon subroutine completion, as required. This makes it readily accessible for further use.
