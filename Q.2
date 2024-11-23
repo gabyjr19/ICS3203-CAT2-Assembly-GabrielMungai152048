@@ -1,72 +1,33 @@
 section .data
-    array db 5, 4, 3, 2, 1  ; Example input array
-    array_len equ 5          ; Length of the array
-    newline db 0xA, 0        ; Newline character for output formatting
-
-section .bss
-    temp resb 1              ; Temporary storage for swapping
+    array db 1, 2, 3, 4, 5      ; Example array (size = 5)
+    length equ 5                ; Length of the array
 
 section .text
     global _start
 
 _start:
-    ; Reverse the array in place using a loop
-    mov ecx, array_len       ; Set ECX to the array length
-    shr ecx, 1               ; ECX = array_len / 2 (loop until halfway)
-
-    mov esi, array           ; ESI points to the start of the array
-    lea edi, [array + array_len - 1] ; EDI points to the last element of the array
+    ; Initialize pointers
+    mov esi, array              ; Start pointer
+    mov edi, array + length - 1 ; End pointer
 
 reverse_loop:
-    cmp ecx, 0               ; Check if ECX (counter) is zero
-    je reverse_done          ; If zero, array reversal is done
+    ; Compare pointers
+    cmp esi, edi
+    jge reverse_done            ; Exit loop if pointers meet or cross
 
-    ; Swap elements at ESI and EDI
-    mov al, [esi]            ; Load value from the start of the array
-    mov bl, [edi]            ; Load value from the end of the array
-    mov [esi], bl            ; Write the end value to the start
-    mov [edi], al            ; Write the start value to the end
+    ; Swap values
+    mov al, [esi]               ; Load value from start
+    mov bl, [edi]               ; Load value from end
+    mov [esi], bl               ; Write value to start
+    mov [edi], al               ; Write value to end
 
-    ; Update pointers and counter
-    inc esi                  ; Move ESI to the next element
-    dec edi                  ; Move EDI to the previous element
-    dec ecx                  ; Decrement counter
-    jmp reverse_loop         ; Repeat loop
+    ; Move pointers
+    inc esi                     ; Move start pointer forward
+    dec edi                     ; Move end pointer backward
+    jmp reverse_loop
 
 reverse_done:
-    ; Print the reversed array
-    mov ecx, array_len       ; Set ECX to the array length
-    mov esi, array           ; ESI points to the start of the array
-
-print_loop:
-    cmp ecx, 0               ; Check if ECX (counter) is zero
-    je print_done            ; If zero, print is done
-
-    ; Print each element
-    mov al, [esi]            ; Load current element
-    add al, '0'              ; Convert to ASCII
-    mov [temp], al           ; Store in temp
-
-    mov eax, 4               ; sys_write syscall
-    mov ebx, 1               ; Write to stdout
-    mov ecx, temp            ; Address of temp
-    mov edx, 1               ; Length (1 character)
-    int 0x80                 ; Interrupt
-
-    ; Print newline
-    mov eax, 4               ; sys_write syscall
-    mov ebx, 1               ; Write to stdout
-    mov ecx, newline         ; Address of newline
-    mov edx, 1               ; Length (1 character)
-    int 0x80                 ; Interrupt
-
-    ; Update pointers and counter
-    inc esi                  ; Move ESI to the next element
-    dec ecx                  ; Decrement counter
-    jmp print_loop           ; Repeat loop
-
-print_done:
-    ; Exit the program
-    mov eax, 1               ; sys_exit syscall
-    xor ebx, ebx             ; Exit code 0
-    int 0x80                 ; Interrupt
+    ; Exit program
+    mov eax, 1                  ; sys_exit
+    xor ebx, ebx                ; Exit code 0
+    int 0x80
