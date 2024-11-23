@@ -33,10 +33,11 @@ _start:
 
     ; Check if number is ZERO
     cmp eax, 0
-    je zero
+    je zero    ;Jumps to the zero label if the number equals zero.
+    
 
     ; Check if number is NEGATIVE
-    jl negative
+    jl negative   ;Jumps to the negative label if the number is less than zero
 
     ; Otherwise, it's POSITIVE
 positive:
@@ -66,3 +67,7 @@ end_program:
     mov eax, 1              ; sys_exit
     xor ebx, ebx            ; Exit code 0
     int 0x80
+
+;Impact on Program Flow
+;Conditional jumps ensure the program takes the correct path based on the input number.
+;Unconditional jumps simplify the control flow by directly moving to the required sections, avoiding unnecessary execution of subsequent code.
