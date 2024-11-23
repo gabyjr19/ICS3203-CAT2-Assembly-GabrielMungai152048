@@ -23,7 +23,7 @@ reverse_loop:
 
     ; Move pointers
     inc esi                     ; Move start pointer forward
-    dec edi                     ; Move end pointer backward
+    dec edi                     ; Move end pointer backward- repeat until esi and edi meet
     jmp reverse_loop
 
 reverse_done:
@@ -31,3 +31,7 @@ reverse_done:
     mov eax, 1                  ; sys_exit
     xor ebx, ebx                ; Exit code 0
     int 0x80
+
+;esi points to start of array
+;edi points to the end of the array
+;Challenges - Direct manipulation of memory requires careful use of registers and addresses.
